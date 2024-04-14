@@ -32,7 +32,7 @@ app.post('/api/user/login', async (req,resp)=>{
             if(err){
                 resp.send({ 'msg' : 'Login Faild', 'token' : '', 'userData' : '', 'status' : 404 });
             }else{
-                resp.send({ 'msg' : 'Login Successfully', 'token' : token, 'userData' : result, 'status' : 200 });
+                resp.send({ 'msg' : 'Login Successfully', 'token' : `barrer ${token}`, 'userData' : result, 'status' : 200 });
             }
         });
     }else{
@@ -59,7 +59,7 @@ app.post('/api/user/register', async (req,resp)=>{
     const checkExist = await User.find({ email : req.body.email });
     if(checkExist.length > 0){ // check already exist or not
         status = 200;
-        respData = { 'msg' : 'This Email Already Taken...', 'status' : 200,'data':checkExist }
+        respData = { 'msg' : 'This Email Already Taken...', 'status' : 404,'data':checkExist }
     }else{
         if(UserInsertData == ''){ // fields required
             status = 404;

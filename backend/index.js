@@ -15,6 +15,7 @@ const secretKey = 'blog-db';
  */
 const User = require('./db/User');
 const Category = require('./db/Category');
+const Post = require('./db/Post');
 
 
 
@@ -120,7 +121,7 @@ app.post('/api/category/add', verifyToken, async (req,resp)=>{
         }else{
             let insertData = {
                 name : req.body.category,
-                user_id : req.body.user_id
+                user_id : req.body.userID
             };
             let newCategory = new Category(insertData);
             let data = await newCategory.save();
@@ -135,7 +136,106 @@ app.post('/api/category/add', verifyToken, async (req,resp)=>{
     }
 
 });
+
+
+/**
+ * get all categorys by user id
+ */
+app.get('/api/get-categorys/:id', verifyToken, async (req,resp)=>{
+    const data = await Category.find({ 'user_id' : req.params.id });
+    if(data){
+        resp.send({ 'data' : data, 'msg' : 'Found Category Data', 'status' : 200 });
+    }else{
+        resp.send({ 'data' : '', 'msg' : 'Not Found Category Data', 'status' : 404 });
+    }
+});
+
+
+/**
+ * all category
+ */
+app.get('/api/get-categorys', verifyToken, async (req,resp)=>{
+    const data = await Category.find();
+    if(data){
+        resp.send({ 'data' : data, 'msg' : 'Found Category Data', 'status' : 200 });
+    }else{
+        resp.send({ 'data' : '', 'msg' : 'Not Found Category Data', 'status' : 404 });
+    }
+});
+
+
+/**
+ * get category by id
+ */
+app.get('/api/get-single-category/:id', verifyToken, async (req,resp)=>{
+    const data = await Category.findOne({ _id : req.params.id });
+    if(data){
+        resp.send({ 'msg' : 'Found Single Category Data', 'data' : data, 'status' : 200  });
+    }else{
+        resp.send({ 'msg' : 'Not Found Single Category Data', 'data' : '', 'status' : 404  });
+    }
+});
+
+/**
+ * update category
+ */
+app.put('/api/update/category/:id', verifyToken, async (req,resp)=>{
+    let check = await Category.findOne({ _id : req.params.id });
+    if(check){
+        let result = await Category.updateOne(
+            { _id   : req.params.id },
+            { $set  : req.body }
+        );
+        resp.send({ 'msg' : 'Category Record Update Successfully', 'status' : 200, 'data' : result });
+    }else{
+        resp.send({ 'msg' : "Somthing wen't wrong!", 'status' : 404 });
+    }
+});
     
+
+/**
+ * category delete
+ */
+app.get('/api/delete/category/:id', verifyToken, async (req,resp)=>{
+    let data = await Category.findOne({ _id : req.params.id });
+    if(data){
+        let result = await Category.deleteOne({ _id : req.params.id }); 
+        if(result){
+            resp.send({ 'msg' : 'Delete Successfully', 'status' : 200 , 'data' : result });
+        }else{
+            resp.send({ 'msg' : 'Delete Successfully', 'status' : 500 });
+        }
+    }else{
+        resp.send({ 'msg' : "Somthing wen't wrong", 'status' : 404 });
+    }
+});
+
+
+/**
+ * post insert
+ */
+app.post('/api/post/insert', verifyToken, async (req,resp)=>{
+    let check = Post.findOne({ title : req.body.title });
+    if(check){
+        resp.send({ 'msg' : 'Post Already Exist', 'status' : 500 });
+    }else{
+        let insertData = {
+            title : req.body.title,
+            description : req.body.desc,
+            cat_id : req.body.cat_id,
+            user_id : req.body.user_id,
+            published_date : published_date,
+            tag : req.body.tag
+        };
+        let post = new Post(insertData);
+        let data = await post.save();
+        if(data){
+            resp.send({ 'msg' : 'Post Insert Successfully', 'status' : 200 });
+        }else{
+            resp.send({ 'msg' : 'Post Not Inserted, Somthing went wrong', 'status' : 404 });
+        }
+    }
+});
 
 
 
